@@ -11,7 +11,7 @@ setup(name='SimonD3MWrapper',
         "Simon"],
     dependency_links=[
         "git+https://github.com/NewKnowledge/simon"
-    ]
+    ],
     entry_points = {
         'd3m.primitives': [
             'distil.simon = SimonD3MWrapper:simon'
