@@ -36,7 +36,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             'name': __author__,
             'uris': [
                 # Unstructured URIs.
-                "https://github.com/NewKnowledge/simon-thin-client",
+                "https://github.com/NewKnowledge/simon-d3m-wrapper",
             ],
         },
         # A list of dependencies in order. These can be Python packages, system packages, or Docker images.
@@ -45,7 +45,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         # a dependency which is not on PyPi.
          'installation': [{
             'type': metadata_module.PrimitiveInstallationType.PIP,
-            'package_uri': 'git+https://github.com/NewKnowledge/simon-thin-client.git@{git_commit}#egg=SimonThinClient'.format(
+            'package_uri': 'git+https://github.com/NewKnowledge/simon-d3m-wrapper.git@{git_commit}#egg=SimonD3MWrapper'.format(
                 git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
         }],
