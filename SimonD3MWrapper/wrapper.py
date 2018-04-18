@@ -7,9 +7,10 @@ import ast
 import typing
 from json import JSONDecoder
 from typing import List
-from primitive_interfaces.base import PrimitiveBase, CallResult
+from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
 
-from d3m_metadata import container, hyperparams, metadata as metadata_module, params, utils
+from d3m import container, metadata as metadata_module, utils
+from d3m.metadata import hyperparams as params
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
