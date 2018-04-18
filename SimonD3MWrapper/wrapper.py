@@ -45,7 +45,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         # install a Python package first to be even able to run setup.py of another package. Or you have
         # a dependency which is not on PyPi.
          'installation': [{
-            'type': metadata_module.PrimitiveInstallationType.PIP,
+            'type': metadata_base.PrimitiveInstallationType.PIP,
             'package_uri': 'git+https://github.com/NewKnowledge/simon-d3m-wrapper.git@{git_commit}#egg=SimonD3MWrapper'.format(
                 git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
@@ -55,9 +55,9 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
         # best describe the primitive, make a merge request.
         'algorithm_types': [
-            metadata_module.PrimitiveAlgorithmType.CONVOLUTIONAL_NEURAL_NETWORK,
+            metadata_base.PrimitiveAlgorithmType.CONVOLUTIONAL_NEURAL_NETWORK,
         ],
-        'primitive_family': metadata_module.PrimitiveFamily.DATA_CLEANING,
+        'primitive_family': metadata_base.PrimitiveFamily.DATA_CLEANING,
     })
     
     def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, docker_containers: typing.Dict[str, str] = None)-> None:
