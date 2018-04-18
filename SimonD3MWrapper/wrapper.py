@@ -60,8 +60,8 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         'primitive_family': metadata_base.PrimitiveFamily.DATA_CLEANING,
     })
     
-    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, docker_containers: typing.Dict[str, str] = None)-> None:
-        super().__init__(hyperparams=hyperparams, random_seed=random_seed, docker_containers=docker_containers)
+    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0)-> None:
+        super().__init__(hyperparams=hyperparams, random_seed=random_seed)
                 
         self._decoder = JSONDecoder()
         self._params = {}
