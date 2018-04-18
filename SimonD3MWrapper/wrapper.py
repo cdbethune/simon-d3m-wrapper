@@ -10,7 +10,7 @@ from typing import List
 from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
 
 from d3m import container, metadata as metadata_module, utils
-from d3m.metadata import hyperparams as params
+from d3m.metadata import hyperparams, params
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
