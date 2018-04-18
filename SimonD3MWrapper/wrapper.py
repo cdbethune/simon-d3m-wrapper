@@ -9,8 +9,8 @@ from json import JSONDecoder
 from typing import List
 from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
 
-from d3m import container, metadata as metadata_module, utils
-from d3m.metadata import hyperparams, params
+from d3m import container, utils
+from d3m.metadata import hyperparams, base as metadata_base, params
 
 __author__ = 'Distil'
 __version__ = '1.0.0'
@@ -26,7 +26,7 @@ class Hyperparams(hyperparams.Hyperparams):
     pass
 
 class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
-    metadata = metadata_module.PrimitiveMetadata({
+    metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "d2fa8df2-6517-3c26-bafc-87b701c4043a",
         'version': __version__,
