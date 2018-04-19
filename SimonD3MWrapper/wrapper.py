@@ -151,9 +151,15 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
                 print("DEBUG::manually annotated header:")
                 print(header)
                 print("DEBUG::%d samples in header..."%len(header))
+
+            if(DEBUG):
+                print("Breakpoint #-1")
     
             tmp = np.char.lower(np.transpose(out).astype('U')) # transpose the data
 
+            if(DEBUG):
+                print("Breakpoint #0")
+            
             # build classifier model    
             Classifier = Simon(encoder=encoder) # text classifier for unit test
 
