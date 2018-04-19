@@ -7,6 +7,12 @@ import ast
 import typing
 from json import JSONDecoder
 from typing import List
+
+from Simon import *
+from Simon.Encoder import *
+from Simon.DataGenerator import *
+from Simon.LengthStandardizer import *
+
 from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
 
 from d3m import container, utils
@@ -15,7 +21,7 @@ from d3m.metadata import hyperparams, base as metadata_base, params
 __author__ = 'Distil'
 __version__ = '1.0.0'
 
-Inputs = container.List[container.pandas.DataFrame]
+Inputs = container.pandas.DataFrame
 Outputs = container.List[container.List[str]]
 
 class Params(params.Params):
@@ -99,21 +105,87 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         -> a list of two lists of lists of 1) column labels and then 2) prediction probabilities
         """
         
-        frame = inputs[1]
-        
+        frame = inputs
+
         try:
-            r = requests.post(inputs[0], data = pickle.dumps(frame))
-            return self._decoder.decode(r.text)
+            # setup model as you typically would in a Simon main file
+            maxlen = 20
+            max_cells = 500
+            p_threshold = 0.5
+        
+            DEBUG = True # boolean to specify whether or not print DEBUG information
+
+            checkpoint_dir = "pretrained_models/"
+
+            with open('Categories.txt','r') as f:
+            Categories = f.read().splitlines()
+    
+            # orient the user a bit
+            print("fixed categories are: ")
+            Categories = sorted(Categories)
+            print(Categories)
+            category_count = len(Categories)
+
+            # load specified execution configuration
+            if execution_config is None:
+                raise TypeError
+            Classifier = Simon(encoder={}) # dummy text classifier
+            config = Classifier.load_config(execution_config, checkpoint_dir)
+            encoder = config['encoder']
+            checkpoint = config['checkpoint']
+
+            raw_data = frame
+
+            variable_names = list(raw_data)
+    
+            nrows,ncols = raw_data.shape
+    
+            out = DataLengthStandardizerRaw(raw_data,max_cells)
+    
+            nx,ny = out.shape
+            if(DEBUG):
+                print("DEBUG::%d rows by %d columns in dataset"%(nx,ny))
+                print("DEBUG::manually annotated header:")
+                print(header)
+                print("DEBUG::%d samples in header..."%len(header))
+    
+            tmp = np.char.lower(np.transpose(out).astype('U')) # transpose the data
+
+            # build classifier model    
+            Classifier = Simon(encoder=encoder) # text classifier for unit test
+        
+            model = Classifier.generate_model(maxlen, max_cells, category_count)
+
+            Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
+    
+            model_compile = lambda m: m.compile(loss='categorical_crossentropy',
+                    optimizer='adam', metrics=['binary_accuracy'])
+    
+            model_compile(model)
+    
+            # encode the data and evaluate model
+            X, y = encoder.encode_data(tmp, header, maxlen)
+            if(DEBUG):
+                print("DEBUG::y is:")
+                print(y)
+                print("DEBUG::The encoded labels (first row) are:")
+                print(y[0,:])
+
+            max_cells = encoder.cur_max_cells
+            data = type('data_type', (object,), {'X_test': X, 'y_test':y})
+    
+            result = Classifier.evaluate_model(max_cells, model, data, encoder, p_threshold)
+
+            return result
         except:
             # Should probably do some more sophisticated error logging here
             return "Failed predicting data frame"
 
 
 if __name__ == '__main__':
-    address = 'http://localhost:5000/'
     client = simon(hyperparams={})
     # make sure to read dataframe as string!
     # frame = pandas.read_csv("https://query.data.world/s/10k6mmjmeeu0xlw5vt6ajry05",dtype='str')
     frame = pandas.read_csv("https://s3.amazonaws.com/d3m-data/merged_o_data/o_4550_merged.csv",dtype='str')
-    result = client.produce(inputs = list([address,frame]))
+    result = client.produce(inputs = frame)
     print(result)
