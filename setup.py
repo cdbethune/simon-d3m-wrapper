@@ -8,7 +8,7 @@ setup(name='SimonD3MWrapper',
         "pandas",
         "requests",
         "typing",
-        "-e git+https://github.com/NewKnowledge/simon#egg=Simon"],
+        "Simon=1.1.0"],
     dependency_links=[
         "git+https://github.com/NewKnowledge/simon"
     ],
