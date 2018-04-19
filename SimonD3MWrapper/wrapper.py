@@ -130,14 +130,14 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             if execution_config is None:
                 raise TypeError
             Classifier = Simon(encoder={}) # dummy text classifier
+            if(DEBUG):
+                print("The input is:")
+                print(frame)
             config = Classifier.load_config(execution_config, checkpoint_dir)
             encoder = config['encoder']
             checkpoint = config['checkpoint']
 
             raw_data = frame
-            if(DEBUG):
-                print("The input is:")
-                print(frame)
 
             variable_names = list(raw_data)
     
