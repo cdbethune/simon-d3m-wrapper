@@ -135,6 +135,9 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             checkpoint = config['checkpoint']
 
             raw_data = frame
+            if(DEBUG):
+                print("The input is:")
+                print(frame)
 
             variable_names = list(raw_data)
     
