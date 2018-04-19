@@ -126,19 +126,13 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             print(Categories)
             category_count = len(Categories)
 
-            if(DEBUG):
-                print("#1 The input is:")
-                print(frame)
-
             execution_config="Base.pkl"
 
             # load specified execution configuration
             if execution_config is None:
                 raise TypeError
             Classifier = Simon(encoder={}) # dummy text classifier
-            if(DEBUG):
-                print("#2 The input is:")
-                print(frame)
+            
             config = Classifier.load_config(execution_config, checkpoint_dir)
             encoder = config['encoder']
             checkpoint = config['checkpoint']
@@ -162,13 +156,25 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
 
             # build classifier model    
             Classifier = Simon(encoder=encoder) # text classifier for unit test
+
+            if(DEBUG):
+                print("Breakpoint #1")
         
             model = Classifier.generate_model(maxlen, max_cells, category_count)
 
+            if(DEBUG):
+                print("Breakpoint #2")
+
             Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
+
+            if(DEBUG):
+                print("Breakpoint #3")
     
             model_compile = lambda m: m.compile(loss='categorical_crossentropy',
                     optimizer='adam', metrics=['binary_accuracy'])
+
+            if(DEBUG):
+                print("Breakpoint #4")
     
             model_compile(model)
     
