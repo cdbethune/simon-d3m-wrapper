@@ -118,7 +118,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             checkpoint_dir = "pretrained_models/"
 
             with open('Categories.txt','r') as f:
-            Categories = f.read().splitlines()
+                Categories = f.read().splitlines()
     
             # orient the user a bit
             print("fixed categories are: ")
