@@ -7,8 +7,7 @@ setup(name='SimonD3MWrapper',
     install_requires=["numpy",
         "pandas",
         "requests",
-        "typing",
-        "Simon==1.1.0"],
+        "typing"],
     dependency_links=[
         "git+https://github.com/NewKnowledge/simon"
     ],
