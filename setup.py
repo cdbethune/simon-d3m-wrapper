@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='SimonD3MWrapper',
-    version='1.0.0',
+    version='1.1.0',
     description='A thin client for interacting with dockerized simon primitive',
     packages=['SimonD3MWrapper'],
     install_requires=["numpy",
