@@ -137,25 +137,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             encoder = config['encoder']
             checkpoint = config['checkpoint']
 
-            raw_data = frame
-
-            variable_names = list(raw_data)
-    
-            nrows,ncols = raw_data.shape
-    
-            out = DataLengthStandardizerRaw(raw_data,max_cells)
-    
-            nx,ny = out.shape
-            if(DEBUG):
-                print("DEBUG::%d rows by %d columns in dataset"%(nx,ny))
-                print("DEBUG::manually annotated header:")
-                print(header)
-                print("DEBUG::%d samples in header..."%len(header))
-
-            if(DEBUG):
-                print("Breakpoint #-1")
-    
-            tmp = np.char.lower(np.transpose(out).astype('U')) # transpose the data
+            X = encoder.encodeDataFrame(frame)
 
             if(DEBUG):
                 print("Breakpoint #0")
@@ -184,18 +166,12 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
     
             model_compile(model)
     
-            # encode the data and evaluate model
-            X, y = encoder.encode_data(tmp, header, maxlen)
-            if(DEBUG):
-                print("DEBUG::y is:")
-                print(y)
-                print("DEBUG::The encoded labels (first row) are:")
-                print(y[0,:])
+            y = model.predict(X)
 
-            max_cells = encoder.cur_max_cells
-            data = type('data_type', (object,), {'X_test': X, 'y_test':y})
-    
-            result = Classifier.evaluate_model(max_cells, model, data, encoder, p_threshold)
+            # discard empty column edge case
+            y[np.all(df.isnull(),axis=0)]=0
+
+            result = encoder.reverse_label_encode(y,p_threshold)
 
             return result
         except:
