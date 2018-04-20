@@ -165,11 +165,20 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
                 print("Breakpoint #4")
     
             model_compile(model)
+
+            if(DEBUG):
+                print("Breakpoint #5")
     
             y = model.predict(X)
 
+            if(DEBUG):
+                print("Breakpoint #6")
+
             # discard empty column edge case
             y[np.all(df.isnull(),axis=0)]=0
+
+            if(DEBUG):
+                print("Breakpoint #7")
 
             result = encoder.reverse_label_encode(y,p_threshold)
 
