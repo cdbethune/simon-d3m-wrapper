@@ -10,7 +10,7 @@ setup(name='SimonD3MWrapper',
         "typing",
         "Simon==1.1.0"],
     dependency_links=[
-        "git+https://github.com/NewKnowledge/simon@908bc252944b0af37d34576caff49af37a5e1157#egg=Simon-1.1.0"
+        "git+https://github.com/NewKnowledge/simon@592cb95aadffcbaa6d87a3f14252726fee3a3ff6#egg=Simon-1.1.0"
     ],
     entry_points = {
         'd3m.primitives': [

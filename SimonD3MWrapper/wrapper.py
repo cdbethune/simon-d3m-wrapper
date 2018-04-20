@@ -138,47 +138,16 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             checkpoint = config['checkpoint']
 
             X = encoder.encodeDataFrame(frame)
-
-            if(DEBUG):
-                print("Breakpoint #0")
             
             # build classifier model    
-            Classifier = Simon(encoder=encoder) # text classifier for unit test
-
-            if(DEBUG):
-                print("Breakpoint #1")
-        
             model = Classifier.generate_model(maxlen, max_cells, category_count)
-
-            if(DEBUG):
-                print("Breakpoint #2")
-
             Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
-
-            if(DEBUG):
-                print("Breakpoint #3")
-    
             model_compile = lambda m: m.compile(loss='categorical_crossentropy',
                     optimizer='adam', metrics=['binary_accuracy'])
-
-            if(DEBUG):
-                print("Breakpoint #4")
-    
             model_compile(model)
-
-            if(DEBUG):
-                print("Breakpoint #5")
-    
             y = model.predict(X)
-
-            if(DEBUG):
-                print("Breakpoint #6")
-
             # discard empty column edge case
             y[np.all(frame.isnull(),axis=0)]=0
-
-            if(DEBUG):
-                print("Breakpoint #7")
 
             result = encoder.reverse_label_encode(y,p_threshold)
 
