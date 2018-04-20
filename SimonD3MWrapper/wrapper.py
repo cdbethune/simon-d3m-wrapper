@@ -53,7 +53,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
          'installation': [{
             'type': metadata_base.PrimitiveInstallationType.PIP,
             'package_uri': 'git+https://github.com/NewKnowledge/simon-d3m-wrapper.git@{git_commit}#egg=SimonD3MWrapper'.format(
-                git_commit='ddf89ebbd73c2a57483077dd9802c40264612966',
+                git_commit='5718eb230f00c91ff15b1e1b27e44313b6765577',
             ),
         }],
         # The same path the primitive is registered with entry points in setup.py.
