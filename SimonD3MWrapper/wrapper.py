@@ -142,7 +142,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             # build classifier model    
             model = Classifier.generate_model(maxlen, max_cells, category_count)
             Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
-            model_compile = lambda m: m.compile(loss='categorical_crossentropy',
+            model_compile = lambda m: m.compile(loss='binary_crossentropy',
                     optimizer='adam', metrics=['binary_accuracy'])
             model_compile(model)
             y = model.predict(X)
