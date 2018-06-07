@@ -19,10 +19,10 @@ from d3m import container, utils
 from d3m.metadata import hyperparams, base as metadata_base, params
 
 __author__ = 'Distil'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 Inputs = container.pandas.DataFrame
-Outputs = container.List[container.List[str]]
+Outputs = container.List
 
 class Params(params.Params):
     pass
@@ -53,7 +53,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
          'installation': [{
             'type': metadata_base.PrimitiveInstallationType.PIP,
             'package_uri': 'git+https://github.com/NewKnowledge/simon-d3m-wrapper.git@{git_commit}#egg=SimonD3MWrapper'.format(
-                git_commit="0977b1171484b61eb1fb4e1ca2dc1fd0a989a8b0",
+                git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
         }],
         # The same path the primitive is registered with entry points in setup.py.
