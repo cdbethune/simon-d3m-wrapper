@@ -22,7 +22,7 @@ __author__ = 'Distil'
 __version__ = '1.1.1'
 
 Inputs = container.pandas.DataFrame
-Outputs = container.List
+Outputs = container.pandas.DataFrame
 
 class Params(params.Params):
     pass
@@ -149,9 +149,9 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             # discard empty column edge case
             y[np.all(frame.isnull(),axis=0)]=0
 
-            result = encoder.reverse_label_encode(y,p_threshold)
+            out = encoder.reverse_label_encode(y,p_threshold)
 
-            return result
+            return pd.DataFrame.from_records(out,columns=['semantic types','probabilities'])
         except:
             # Should probably do some more sophisticated error logging here
             return "Failed predicting data frame"
