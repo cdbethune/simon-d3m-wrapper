@@ -39,7 +39,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         'name': "simon",
         # Keywords do not have a controlled vocabulary. Authors can put here whatever they find suitable.
         'keywords': ['Data Type Predictor','Semantic Classification','Text','NLP','Tabular'],
-        'source': {,
+        'source': {
             'name': __author__,
             'uris': [
                 # Unstructured URIs.
