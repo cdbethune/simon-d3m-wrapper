@@ -38,8 +38,8 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         'version': __version__,
         'name': "simon",
         # Keywords do not have a controlled vocabulary. Authors can put here whatever they find suitable.
-        'keywords': ['Data Type Predictor'],
-        'source': {
+        'keywords': ['Data Type Predictor','Semantic Classification','Text','NLP','Tabular'],
+        'source': {,
             'name': __author__,
             'uris': [
                 # Unstructured URIs.
@@ -150,8 +150,11 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             y[np.all(frame.isnull(),axis=0)]=0
 
             out = encoder.reverse_label_encode(y,p_threshold)
+            
+            out_df = pandas.DataFrame.from_records(list(out)).T
+            out_df.columns = ['semantic types','probabilities']
 
-            return pd.DataFrame.from_records(out,columns=['semantic types','probabilities'])
+            return out_df
         except:
             # Should probably do some more sophisticated error logging here
             return "Failed predicting data frame"
