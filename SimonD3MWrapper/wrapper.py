@@ -13,6 +13,8 @@ from Simon.Encoder import *
 from Simon.DataGenerator import *
 from Simon.LengthStandardizer import *
 
+from Simon.penny.guesser import guess
+
 from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
 
 from d3m import container, utils
