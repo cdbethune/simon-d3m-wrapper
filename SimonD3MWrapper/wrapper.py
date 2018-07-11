@@ -149,9 +149,34 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             # discard empty column edge case
             y[np.all(frame.isnull(),axis=0)]=0
 
-            out = encoder.reverse_label_encode(y,p_threshold)
+            result = encoder.reverse_label_encode(y,p_threshold)
+
+            ## LABEL COMBINED DATA AS CATEGORICAL/ORDINAL
+            print("Beginning Guessing categorical/ordinal classifications...")
+            category_count = 0
+            ordinal_count = 0
+            raw_data = frame.as_matrix()
+            for i in np.arange(raw_data.shape[1]):
+                tmp = guess(raw_data[:,i], for_types ='category')
+                if tmp[0]=='category':
+                    category_count += 1
+                    tmp2 = list(result[0][i])
+                    tmp2.append('categorical')
+                    result[0][i] = tuple(tmp2)
+                    result[1][i].append(1)
+                    if ('int' in result[1][i]) or ('float' in result[1][i]) \
+                        or ('datetime' in result[1][i]):
+                            ordinal_count += 1
+                            tmp2 = list(result[0][i])
+                            tmp2.append('ordinal')
+                            result[0][i] = tuple(tmp2)
+                            result[1][i].append(1)
+            print("Done with statistical variable guessing")
+            ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
+
+            Classifier.clear_session()
             
-            out_df = pandas.DataFrame.from_records(list(out)).T
+            out_df = pandas.DataFrame.from_records(list(result)).T
             out_df.columns = ['semantic types','probabilities']
 
             return out_df
