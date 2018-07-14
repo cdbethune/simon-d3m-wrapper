@@ -57,7 +57,14 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             'package_uri': 'git+https://github.com/NewKnowledge/simon-d3m-wrapper.git@{git_commit}#egg=SimonD3MWrapper'.format(
                 git_commit=utils.current_git_commit(os.path.dirname(__file__)),
             ),
-        }],
+        },
+            {
+            "type": "TGZ",
+            "key": "simon_models",
+            "file_uri": "http://public.datadrivendiscovery.org/simon_models.tar.gz",
+            "file_digest":"c0e112493d796f472f5fe35087eac695d2845ace08b1fe825a0a0328caaf9dfc"
+        },
+        ],
         # The same path the primitive is registered with entry points in setup.py.
         'python_path': 'd3m.primitives.distil.simon',
         # Choose these from a controlled vocabulary in the schema. If anything is missing which would
@@ -68,11 +75,12 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         'primitive_family': metadata_base.PrimitiveFamily.DATA_CLEANING,
     })
     
-    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0)-> None:
-        super().__init__(hyperparams=hyperparams, random_seed=random_seed)
+    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, volumes: typing.Dict[str,str]=None)-> None:
+        super().__init__(hyperparams=hyperparams, random_seed=random_seed, volumes=volumes)
                 
         self._decoder = JSONDecoder()
         self._params = {}
+        self.volumes = volumes
 
     def fit(self) -> None:
         pass
@@ -117,9 +125,9 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         
             DEBUG = True # boolean to specify whether or not print DEBUG information
 
-            checkpoint_dir = "pretrained_models/"
+            checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
 
-            with open('Categories.txt','r') as f:
+            with open(self.volumes["simon_models"]+"/Categories.txt",'r') as f:
                 Categories = f.read().splitlines()
     
             # orient the user a bit
