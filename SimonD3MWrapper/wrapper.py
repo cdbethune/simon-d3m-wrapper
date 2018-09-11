@@ -189,7 +189,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
             out_df = pandas.DataFrame.from_records(list(result)).T
             out_df.columns = ['semantic types','probabilities']
 
-            return out_df
+            return CallResult(out_df)
         except:
             # Should probably do some more sophisticated error logging here
             return "Failed predicting data frame"
