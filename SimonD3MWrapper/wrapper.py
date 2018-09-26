@@ -74,17 +74,17 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         ],
         'primitive_family': metadata_base.PrimitiveFamily.DATA_CLEANING,
     })
-    
+
     def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, volumes: typing.Dict[str,str]=None)-> None:
         super().__init__(hyperparams=hyperparams, random_seed=random_seed, volumes=volumes)
-                
+
         self._decoder = JSONDecoder()
         self._params = {}
         self.volumes = volumes
 
     def fit(self) -> None:
         pass
-    
+
     def get_params(self) -> Params:
         return self._params
 
@@ -93,11 +93,11 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
 
     def set_training_data(self, *, inputs: Inputs, outputs: Outputs) -> None:
         pass
-        
+
     def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
         """
         Produce primitive's best guess for the structural type of each input column.
-        
+
         Parameters
         ----------
         inputs : Input pandas frame
@@ -105,95 +105,90 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         Returns
         -------
         Outputs
-            The outputs is two lists of lists, each has length equal to number of columns in input pandas frame. 
+            The outputs is two lists of lists, each has length equal to number of columns in input pandas frame.
             Each entry of the first one is a list of strings corresponding to each column's multi-label classification.
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
-        
+
         """ Accept a pandas data frame, predicts column types in it
         frame: a pandas data frame containing the data to be processed
         -> a list of two lists of lists of 1) column labels and then 2) prediction probabilities
         """
-        
+
         frame = inputs
 
-        try:
-            # setup model as you typically would in a Simon main file
-            maxlen = 20
-            max_cells = 500
-            p_threshold = 0.5
-        
-            DEBUG = True # boolean to specify whether or not print DEBUG information
+        # setup model as you typically would in a Simon main file
+        maxlen = 20
+        max_cells = 500
+        p_threshold = 0.5
 
-            checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
+        DEBUG = True # boolean to specify whether or not print DEBUG information
 
-            with open(self.volumes["simon_models"]+"/Categories.txt",'r') as f:
-                Categories = f.read().splitlines()
-    
-            # orient the user a bit
-            print("fixed categories are: ")
-            Categories = sorted(Categories)
-            print(Categories)
-            category_count = len(Categories)
+        checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
 
-            execution_config="Base.pkl"
+        with open(self.volumes["simon_models"]+"/Categories.txt",'r') as f:
+            Categories = f.read().splitlines()
 
-            # load specified execution configuration
-            if execution_config is None:
-                raise TypeError
-            Classifier = Simon(encoder={}) # dummy text classifier
-            
-            config = Classifier.load_config(execution_config, checkpoint_dir)
-            encoder = config['encoder']
-            checkpoint = config['checkpoint']
+        # orient the user a bit
+        print("fixed categories are: ")
+        Categories = sorted(Categories)
+        print(Categories)
+        category_count = len(Categories)
 
-            X = encoder.encodeDataFrame(frame)
-            
-            # build classifier model    
-            model = Classifier.generate_model(maxlen, max_cells, category_count)
-            Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
-            model_compile = lambda m: m.compile(loss='binary_crossentropy',
-                    optimizer='adam', metrics=['binary_accuracy'])
-            model_compile(model)
-            y = model.predict(X)
-            # discard empty column edge case
-            y[np.all(frame.isnull(),axis=0)]=0
+        execution_config="Base.pkl"
 
-            result = encoder.reverse_label_encode(y,p_threshold)
+        # load specified execution configuration
+        if execution_config is None:
+            raise TypeError
+        Classifier = Simon(encoder={}) # dummy text classifier
 
-            ## LABEL COMBINED DATA AS CATEGORICAL/ORDINAL
-            print("Beginning Guessing categorical/ordinal classifications...")
-            category_count = 0
-            ordinal_count = 0
-            raw_data = frame.as_matrix()
-            for i in np.arange(raw_data.shape[1]):
-                tmp = guess(raw_data[:,i], for_types ='category')
-                if tmp[0]=='category':
-                    category_count += 1
-                    tmp2 = list(result[0][i])
-                    tmp2.append('categorical')
-                    result[0][i] = tuple(tmp2)
-                    result[1][i].append(1)
-                    if ('int' in result[1][i]) or ('float' in result[1][i]) \
-                        or ('datetime' in result[1][i]):
-                            ordinal_count += 1
-                            tmp2 = list(result[0][i])
-                            tmp2.append('ordinal')
-                            result[0][i] = tuple(tmp2)
-                            result[1][i].append(1)
-            print("Done with statistical variable guessing")
-            ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
+        config = Classifier.load_config(execution_config, checkpoint_dir)
+        encoder = config['encoder']
+        checkpoint = config['checkpoint']
 
-            Classifier.clear_session()
-            
-            out_df = pandas.DataFrame.from_records(list(result)).T
-            out_df.columns = ['semantic types','probabilities']
+        X = encoder.encodeDataFrame(frame)
 
-            return out_df
-        except:
-            # Should probably do some more sophisticated error logging here
-            return "Failed predicting data frame"
+        # build classifier model
+        model = Classifier.generate_model(maxlen, max_cells, category_count)
+        Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
+        model_compile = lambda m: m.compile(loss='binary_crossentropy',
+                optimizer='adam', metrics=['binary_accuracy'])
+        model_compile(model)
+        y = model.predict(X)
+        # discard empty column edge case
+        y[np.all(frame.isnull(),axis=0)]=0
 
+        result = encoder.reverse_label_encode(y,p_threshold)
+
+        ## LABEL COMBINED DATA AS CATEGORICAL/ORDINAL
+        print("Beginning Guessing categorical/ordinal classifications...")
+        category_count = 0
+        ordinal_count = 0
+        raw_data = frame.as_matrix()
+        for i in np.arange(raw_data.shape[1]):
+            tmp = guess(raw_data[:,i], for_types ='category')
+            if tmp[0]=='category':
+                category_count += 1
+                tmp2 = list(result[0][i])
+                tmp2.append('categorical')
+                result[0][i] = tuple(tmp2)
+                result[1][i].append(1)
+                if ('int' in result[1][i]) or ('float' in result[1][i]) \
+                    or ('datetime' in result[1][i]):
+                        ordinal_count += 1
+                        tmp2 = list(result[0][i])
+                        tmp2.append('ordinal')
+                        result[0][i] = tuple(tmp2)
+                        result[1][i].append(1)
+        print("Done with statistical variable guessing")
+        ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
+
+        Classifier.clear_session()
+
+        out_df = pandas.DataFrame.from_records(list(result)).T
+        out_df.columns = ['semantic types','probabilities']
+
+        return CallResult(out_df)
 
 if __name__ == '__main__':
     client = simon(hyperparams={})
