@@ -21,7 +21,7 @@ from d3m import container, utils
 from d3m.metadata import hyperparams, base as metadata_base, params
 
 __author__ = 'Distil'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
