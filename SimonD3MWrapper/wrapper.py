@@ -191,9 +191,11 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         return CallResult(out_df)
 
 if __name__ == '__main__':
-    client = simon(hyperparams={})
+    volumes = {} # d3m large primitive architecture dictionary of large files
+    volumes["simon_models"]='/home/simon_models' # location of extracted required files archive
+    client = simon(hyperparams={},volumes=volumes)
     # make sure to read dataframe as string!
-    # frame = pandas.read_csv("https://query.data.world/s/10k6mmjmeeu0xlw5vt6ajry05",dtype='str')
-    frame = pandas.read_csv("https://s3.amazonaws.com/d3m-data/merged_o_data/o_4550_merged.csv",dtype='str')
+    # frame = pandas.read_csv("https://query.data.world/s/10k6mmjmeeu0xlw5vt6ajry05",dtype=str)
+    frame = pandas.read_csv("https://s3.amazonaws.com/d3m-data/merged_o_data/o_4550_merged.csv",dtype=str)
     result = client.produce(inputs = frame)
     print(result)
