@@ -1,12 +1,7 @@
 import os.path
 import numpy as np
 import pandas
-import pickle
-import requests
-import ast
 import typing
-from json import JSONDecoder
-from typing import List
 
 from Simon import *
 from Simon.Encoder import *
@@ -15,25 +10,25 @@ from Simon.LengthStandardizer import *
 
 from Simon.penny.guesser import guess
 
-from d3m.primitive_interfaces.base import PrimitiveBase, CallResult
+from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
+from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.metadata import hyperparams, base as metadata_base, params
+from d3m.container import DataFrame as d3m_DataFrame
+from d3m.metadata import hyperparams, base as metadata_base
+
+from common_primitives import utils as utils_cp
 
 __author__ = 'Distil'
-__version__ = '1.1.2'
+__version__ = '1.2.1'
 
 Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
 
-class Params(params.Params):
-    pass
-
-
 class Hyperparams(hyperparams.Hyperparams):
     pass
 
-class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
+class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "d2fa8df2-6517-3c26-bafc-87b701c4043a",
@@ -78,21 +73,7 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
     def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, volumes: typing.Dict[str,str]=None)-> None:
         super().__init__(hyperparams=hyperparams, random_seed=random_seed, volumes=volumes)
 
-        self._decoder = JSONDecoder()
-        self._params = {}
         self.volumes = volumes
-
-    def fit(self) -> None:
-        pass
-
-    def get_params(self) -> Params:
-        return self._params
-
-    def set_params(self, *, params: Params) -> None:
-        self.params = params
-
-    def set_training_data(self, *, inputs: Inputs, outputs: Outputs) -> None:
-        pass
 
     def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
         """
@@ -188,7 +169,22 @@ class simon(PrimitiveBase[Inputs, Outputs, Params, Hyperparams]):
         out_df = pandas.DataFrame.from_records(list(result)).T
         out_df.columns = ['semantic types','probabilities']
 
-        return CallResult(out_df)
+        # add metadata to output data frame
+        simon_df = d3m_dataFrame(out_df)
+        # first column ('semantic types')
+        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
+        col_dict['structural_type'] = type("this is text")
+        col_dict['name'] = 'semantic types'
+        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
+        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 0), col_dict)
+        # second column ('probabilities')
+        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 1)))
+        col_dict['structural_type'] = type("this is text")
+        col_dict['name'] = 'probabilities'
+        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
+        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 1), col_dict)
+
+        return CallResult(simon_df)
 
 if __name__ == '__main__':
     client = simon(hyperparams={})
