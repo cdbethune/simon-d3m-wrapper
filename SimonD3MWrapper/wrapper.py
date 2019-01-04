@@ -243,6 +243,6 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 if __name__ == '__main__':
     client = simon(hyperparams={'overwrite':False})
     # make sure to read dataframe as string!
-    frame = D3MDatasetLoader().load(dataset_uri = "/data/home/jgleason/D3m/datasets/seed_datasets_current/185_baseball/TRAIN/dataset_TRAIN/datasetDoc.json")
+    frame = D3MDatasetLoader().load(dataset_uri = "/home/datasetDoc.json")
     result = client.produce(inputs = frame)
     #print(result)
