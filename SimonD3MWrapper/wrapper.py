@@ -14,7 +14,8 @@ from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.container import Dataset, D3MDatasetLoader, DataFrame as d3m_DataFrame
+from d3.container.dataset import Dataset, D3MDatasetLoader 
+from d3m.container import DataFrame as d3m_DataFrame
 from d3m.metadata import hyperparams, base as metadata_base
 
 from common_primitives import utils as utils_cp
