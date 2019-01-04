@@ -14,7 +14,7 @@ from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.container import DataFrame as d3m_DataFrame
+from d3m.container import Dataset, D3MDatasetLoader, DataFrame as d3m_DataFrame
 from d3m.metadata import hyperparams, base as metadata_base
 
 from common_primitives import utils as utils_cp
@@ -26,9 +26,12 @@ Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
 
 class Hyperparams(hyperparams.Hyperparams):
+    overwrite = hyperparams.UniformBool(default = False, semantic_types = [
+        'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        description='whether to overwrite manual annotations with SIMON annotations')
     pass
 
-class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
+class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "d2fa8df2-6517-3c26-bafc-87b701c4043a",
@@ -75,13 +78,13 @@ class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         self.volumes = volumes
 
-    def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
+    def _produce_annotations(self, *, inputs: Inputs) -> Outputs:
         """
-        Produce primitive's best guess for the structural type of each input column.
+        Private method that produces primtive's best guess for structural type of each input column
 
         Parameters
         ----------
-        inputs : Input pandas frame
+        inputs: Input pandas frame
 
         Returns
         -------
@@ -89,11 +92,6 @@ class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
             The outputs is two lists of lists, each has length equal to number of columns in input pandas frame.
             Each entry of the first one is a list of strings corresponding to each column's multi-label classification.
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
-        """
-
-        """ Accept a pandas data frame, predicts column types in it
-        frame: a pandas data frame containing the data to be processed
-        -> a list of two lists of lists of 1) column labels and then 2) prediction probabilities
         """
 
         frame = inputs
@@ -168,6 +166,25 @@ class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         out_df = pandas.DataFrame.from_records(list(result)).T
         out_df.columns = ['semantic types','probabilities']
+        return(out_df)
+
+    def produce_metafeatures(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
+        """
+        Produce primitive's best guess for the structural type of each input column.
+
+        Parameters
+        ----------
+        inputs : D3M Dataset object
+
+        Returns
+        -------
+        Outputs
+            The outputs is two lists of lists, each has length equal to number of columns in input pandas frame.
+            Each entry of the first one is a list of strings corresponding to each column's multi-label classification.
+            Each entry of the second one is a list of floats corresponding to prediction probabilities.
+        """
+
+        out_df = self._produce_annotations(inputs)
 
         # add metadata to output data frame
         simon_df = d3m_dataFrame(out_df)
@@ -186,10 +203,46 @@ class simon(PrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         return CallResult(simon_df)
 
+    def produce(self, *, inputs: container.dataset.Dataset, timeout: float = None, iterations: int = None) -> None: #CallResult[Outputs]:
+        """
+        Add SIMON annotations if manual annotations do not exist. Hyperparameter overwrite controls whether manual 
+        annotations should be overwritten with SIMON annotations.
+
+        Parameters
+        ----------
+        inputs : Input pandas frame
+
+        Returns
+        -------
+        Outputs
+            Input pandas frame with metadata augmented and optionally overwritten
+        """
+
+        #out_df = self._produce_annotations(inputs)
+        print(inputs.metadata)
+
+        '''
+        # add metadata to output data frame
+        simon_df = d3m_dataFrame(out_df)
+        # first column ('semantic types')
+        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
+        col_dict['structural_type'] = type("this is text")
+        col_dict['name'] = 'semantic types'
+        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
+        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 0), col_dict)
+        # second column ('probabilities')
+        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 1)))
+        col_dict['structural_type'] = type("this is text")
+        col_dict['name'] = 'probabilities'
+        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
+        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 1), col_dict)
+
+        return CallResult(simon_df)
+        '''
+
 if __name__ == '__main__':
-    client = simon(hyperparams={})
+    client = simon(hyperparams={'overwrite':False})
     # make sure to read dataframe as string!
-    # frame = pandas.read_csv("https://query.data.world/s/10k6mmjmeeu0xlw5vt6ajry05",dtype='str')
-    frame = pandas.read_csv("https://s3.amazonaws.com/d3m-data/merged_o_data/o_4550_merged.csv",dtype='str')
+    frame = D3MDatasetLoader().load(dataset_uri = "/data/home/jgleason/D3m/datasets/seed_datasets_current/185_baseball/TRAIN/dataset_TRAIN/datasetDoc.json")
     result = client.produce(inputs = frame)
-    print(result)
+    #print(result)
