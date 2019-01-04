@@ -23,7 +23,7 @@ from common_primitives import utils as utils_cp
 __author__ = 'Distil'
 __version__ = '1.2.1'
 
-Inputs = container.pandas.DataFrame
+Inputs = container.dataset.Dataset
 Outputs = container.pandas.DataFrame
 
 class Hyperparams(hyperparams.Hyperparams):
@@ -95,6 +95,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
 
+        # TODO = convert dataset.Dataset to pandas.DataFrame
         frame = inputs
 
         # setup model as you typically would in a Simon main file
