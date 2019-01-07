@@ -79,7 +79,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         self.volumes = volumes
 
-    def _produce_annotations(self, *, inputs: Inputs) -> Outputs:
+    def _produce_annotations(self, inputs: Inputs) -> Outputs:
         """
         Private method that produces primtive's best guess for structural type of each input column
 
@@ -268,5 +268,11 @@ if __name__ == '__main__':
     # SIMON client
     # try with no hyperparameter
     simon_client = simon(hyperparams={'overwrite':False})
+
+    # produce method
     result = simon_client.produce(inputs = df.value)
     print(result.value)
+
+    # produce_metafeatures method
+    features = simon_client.produce_metafeatures(inputs = df.value)
+    print(features.value)
