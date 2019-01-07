@@ -184,10 +184,10 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
 
-        out_df = self._produce_annotations(inputs)
+        simon_df = self._produce_annotations(inputs)
 
         # add metadata to output data frame
-        simon_df = d3m_DataFrame(out_df)
+        #simon_df = d3m_DataFrame(out_df)
         # first column ('semantic types')
         col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
         col_dict['structural_type'] = type("this is text")
@@ -257,7 +257,6 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             if semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
                 col_dict['semantic_types'][1] = 'https://metadata.datadrivendiscovery.org/types/Attribute'
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
-        print(inputs.metadata.query_column(0))
         print(inputs.metadata.query_column(0))
         return CallResult(inputs)
 
