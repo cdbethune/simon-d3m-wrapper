@@ -236,9 +236,8 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             # TODO: add functionality to sample from probabilities??
             index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
             annotation = simon_annotations['semantic types'][i][index]
-            print(annotation)
-            semantic_type = metadata['semantic_type']
-            if overwrite or semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():           
+            semantic_types = metadata['semantic_types']
+            if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():           
                 if annotation == 'categorical':
                     col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/CategoricalData'
                 elif annotation == 'address' or annotation == 'email' or annotation == 'text' or annotation == 'uri':
