@@ -255,7 +255,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             if semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():
                 col_dict['semantic_types'][1] = 'https://metadata.datadrivendiscovery.org/types/Attribute'
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
-
+        print(inputs.metadata.query_column(0))
         print(inputs.metadata.query_column(0))
         return CallResult(inputs)
 
@@ -267,7 +267,9 @@ if __name__ == '__main__':
 
     # SIMON client
     # try with no hyperparameter
-    simon_client = simon(hyperparams={'overwrite':False})
+    volumes = {} # d3m large primitive architecture dictionary of large files
+    volumes['simon_models'] = '/home/simon_models'
+    simon_client = simon(hyperparams={'overwrite':False}, volumes = volumes)
 
     # produce method
     result = simon_client.produce(inputs = df.value)
