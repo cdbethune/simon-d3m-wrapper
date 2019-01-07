@@ -14,9 +14,9 @@ from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.container.dataset import Dataset
 from d3m.container import DataFrame as d3m_DataFrame
 from d3m.metadata import hyperparams, base as metadata_base
+from d3m.primitives.datasets import DatasetToDataFrame
 
 from common_primitives import utils as utils_cp
 
@@ -258,7 +258,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         print(inputs.metadata.query_column(0))
         return CallResult(inputs)
-        
+
 if __name__ == '__main__':  
     # LOAD DATA AND PREPROCESSING
     input_dataset = container.Dataset.load("file:///home/196_autoMpg/TRAIN/dataset_TRAIN/datasetDoc.json")
