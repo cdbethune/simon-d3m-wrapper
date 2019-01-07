@@ -79,7 +79,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         self.volumes = volumes
 
-    def _produce_annotations(self, inputs: Inputs) -> Outputs:
+    def _produce_annotations(self, inputs: Inputs) -> CallResult[Outputs]:
         """
         Private method that produces primtive's best guess for structural type of each input column
 
@@ -166,7 +166,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         out_df = pandas.DataFrame.from_records(list(result)).T
         out_df.columns = ['semantic types','probabilities']
-        return(out_df)
+        return(CallResult(out_df))
 
     def produce_metafeatures(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
         """
