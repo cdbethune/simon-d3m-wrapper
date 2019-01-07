@@ -254,7 +254,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                     col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber'
                 elif annotation == 'ordinal':
                     col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/OrdinalData'
-            if semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():
+            if semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
                 col_dict['semantic_types'][1] = 'https://metadata.datadrivendiscovery.org/types/Attribute'
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
         print(inputs.metadata.query_column(0))
