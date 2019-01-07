@@ -223,8 +223,9 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         # overwrite or augment metadata with SIMON annotations
         for i in range(0, inputs.shape[1]):
-            col_dict = dict(inputs.metadata.query_column(i))
-            structural_type = inputs.metadata.query_column(i)
+            metadata = inputs.metadata.query_column(i)
+            col_dict = dict(metadata)
+            structural_type = metadata['structural_type']
 
             # structural types
             if overwrite or structural_type is "" or structural_type is None or 'structural_type' not in metadata.keys():
@@ -234,7 +235,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             # overwrite with SIMON annotation of highest probability
             # TODO: add functionality to sample from probabilities??
             annotation = simon_annotations['semantic_types'][i].index(max(simon_annotations['probabilties'][i]))
-            semantic_type = inputs.metadata.query_column(i)
+            semantic_type = metadata['semantic_type']
             if overwrite or semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():           
                 if annotation == 'categorical':
                     col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/CategoricalData'
