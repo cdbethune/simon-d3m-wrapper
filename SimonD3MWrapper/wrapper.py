@@ -234,7 +234,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             # semantic types
             # overwrite with SIMON annotation of highest probability
             # TODO: add functionality to sample from probabilities??
-            annotation = simon_annotations['semantic types'][i].index(max(simon_annotations['probabilties'][i]))
+            annotation = simon_annotations['semantic types'][i].index(max(simon_annotations['probabilities'][i]))
             semantic_type = metadata['semantic_type']
             if overwrite or semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():           
                 if annotation == 'categorical':
