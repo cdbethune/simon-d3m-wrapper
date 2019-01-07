@@ -187,7 +187,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         out_df = self._produce_annotations(inputs)
 
         # add metadata to output data frame
-        simon_df = d3m_dataFrame(out_df)
+        simon_df = d3m_DataFrame(out_df)
         # first column ('semantic types')
         col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
         col_dict['structural_type'] = type("this is text")
