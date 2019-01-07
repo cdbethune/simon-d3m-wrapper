@@ -14,7 +14,7 @@ from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.container.dataset import Dataset, D3MDatasetLoader 
+from d3m.container.dataset import Dataset
 from d3m.container import DataFrame as d3m_DataFrame
 from d3m.metadata import hyperparams, base as metadata_base
 
@@ -23,7 +23,7 @@ from common_primitives import utils as utils_cp
 __author__ = 'Distil'
 __version__ = '1.2.1'
 
-Inputs = container.dataset.Dataset
+Inputs = container.pandas.DataFrame
 Outputs = container.pandas.DataFrame
 
 class Hyperparams(hyperparams.Hyperparams):
@@ -94,8 +94,6 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Each entry of the first one is a list of strings corresponding to each column's multi-label classification.
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
-
-        # TODO = convert dataset.Dataset to pandas.DataFrame
         frame = inputs
 
         # setup model as you typically would in a Simon main file
@@ -205,7 +203,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         return CallResult(simon_df)
 
-    def produce(self, *, inputs: container.dataset.Dataset, timeout: float = None, iterations: int = None) -> None: #CallResult[Outputs]:
+    def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> None: #CallResult[Outputs]:
         """
         Add SIMON annotations if manual annotations do not exist. Hyperparameter overwrite controls whether manual 
         annotations should be overwritten with SIMON annotations.
@@ -219,32 +217,56 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         Outputs
             Input pandas frame with metadata augmented and optionally overwritten
         """
+        # calculate SIMON annotations
+        simon_annotations = self._produce_annotations(inputs)
+        overwrite = self.hyperparams['overwrite']
 
-        #out_df = self._produce_annotations(inputs)
-        print(inputs.metadata)
+        # overwrite or augment metadata with SIMON annotations
+        for i in range(0, inputs.shape[1]):
+            col_dict = dict(inputs.metadata.query_column(i))
+            structural_type = inputs.metadata.query_column(i)
 
-        '''
-        # add metadata to output data frame
-        simon_df = d3m_dataFrame(out_df)
-        # first column ('semantic types')
-        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
-        col_dict['structural_type'] = type("this is text")
-        col_dict['name'] = 'semantic types'
-        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
-        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 0), col_dict)
-        # second column ('probabilities')
-        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 1)))
-        col_dict['structural_type'] = type("this is text")
-        col_dict['name'] = 'probabilities'
-        col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
-        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 1), col_dict)
+            # structural types
+            if overwrite or structural_type is "" or structural_type is None or 'structural_type' not in metadata.keys():
+                col_dict['structural_type'] = type("string")
 
-        return CallResult(simon_df)
-        '''
+            # semantic types
+            # overwrite with SIMON annotation of highest probability
+            # TODO: add functionality to sample from probabilities??
+            annotation = simon_annotations['semantic_types'][i].index(max(simon_annotations['probabilties'][i]))
+            semantic_type = inputs.metadata.query_column(i)
+            if overwrite or semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():           
+                if annotation == 'categorical':
+                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/CategoricalData'
+                elif annotation == 'address' or annotation == 'email' or annotation == 'text' or annotation == 'uri':
+                    col_dict['semantic_types'][0] = 'https://schema.org/Text'
+                elif annotation == 'boolean':
+                    col_dict['semantic_types'][0] = 'https://schema.org/Boolean'
+                elif annotation == 'datetime':
+                    col_dict['semantic_types'][0] = 'https://schema.org/DateTime'
+                elif annotation == 'float':
+                    col_dict['semantic_types'][0] = 'https://schema.org/Float'
+                elif annotation == 'int':
+                    col_dict['semantic_types'][0] = 'https://schema.org/Integer'
+                elif annotation == 'phone':
+                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber'
+                elif annotation == 'ordinal':
+                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/OrdinalData'
+            if semantic_type is "" or semantic_type is None or 'semantic_type' not in metadata.keys():
+                col_dict['semantic_types'][1] = 'https://metadata.datadrivendiscovery.org/types/Attribute'
+            inputs.metadata = inputs.metadata.update_column(i, col_dict)
 
-if __name__ == '__main__':
-    client = simon(hyperparams={'overwrite':False})
-    # make sure to read dataframe as string!
-    frame = D3MDatasetLoader().load(dataset_uri = "file:///datasetDoc.json")
-    result = client.produce(inputs = frame)
-    #print(result)
+        print(inputs.metadata.query_column(0))
+        return CallResult(inputs)
+        
+if __name__ == '__main__':  
+    # LOAD DATA AND PREPROCESSING
+    input_dataset = container.Dataset.load("file:///home/196_autoMpg/TRAIN/dataset_TRAIN/datasetDoc.json")
+    ds2df_client = DatasetToDataFrame(hyperparams={"dataframe_resource":"0"})
+    df = ds2df_client.produce(inputs = input_dataset)
+
+    # SIMON client
+    # try with no hyperparameter
+    simon_client = simon(hyperparams={'overwrite':False})
+    result = simon_client.produce(inputs = df.value)
+    print(result.value)
