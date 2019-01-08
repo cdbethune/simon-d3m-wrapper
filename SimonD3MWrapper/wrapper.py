@@ -14,7 +14,7 @@ from d3m.primitive_interfaces.transformer import TransformerPrimitiveBase
 from d3m.primitive_interfaces.base import CallResult
 
 from d3m import container, utils
-from d3m.container import DataFrame as d3m_DataFrame
+from d3m.container import DataFrame as d3m_DataFrame, List as d3m_List
 from d3m.metadata import hyperparams, base as metadata_base
 from d3m.primitives.datasets import DatasetToDataFrame
 
@@ -146,7 +146,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         raw_data = frame.as_matrix()
         for i in np.arange(raw_data.shape[1]):
             tmp = guess(raw_data[:,i], for_types ='category')
-            result[0][i] = list(result[0][i])
+            result[0][i] = d3m_List(result[0][i])
             if tmp[0]=='category':
                 category_count += 1
                 tmp2 = result[0][i]
