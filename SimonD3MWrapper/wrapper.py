@@ -105,7 +105,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
 
-        with open(self.volumes["simon_models"]+"/Categories.txt",'r') as f:
+        with open(self.volumes["simon_models_1"]+"/Categories.txt",'r') as f:
             Categories = f.read().splitlines()
 
         # orient the user a bit
