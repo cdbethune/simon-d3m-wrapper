@@ -146,16 +146,17 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         raw_data = frame.as_matrix()
         for i in np.arange(raw_data.shape[1]):
             tmp = guess(raw_data[:,i], for_types ='category')
+            result[0][i] = list(result[0][i])
             if tmp[0]=='category':
                 category_count += 1
-                tmp2 = list(result[0][i])
+                tmp2 = result[0][i]
                 tmp2.append('categorical')
                 result[0][i] = tmp2
                 result[1][i].append(1)
                 if ('int' in result[1][i]) or ('float' in result[1][i]) \
                     or ('datetime' in result[1][i]):
                         ordinal_count += 1
-                        tmp2 = list(result[0][i])
+                        tmp2 = result[0][i]
                         tmp2.append('ordinal')
                         result[0][i] = tmp2
                         result[1][i].append(1)
