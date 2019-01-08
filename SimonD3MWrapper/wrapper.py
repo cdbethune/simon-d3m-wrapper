@@ -79,7 +79,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         self.volumes = volumes
 
-    def _produce_annotations(self, inputs: Inputs) -> Outputs:
+    def _produce_annotations(self, *, inputs: Inputs) -> Outputs:
         """
         Private method that produces primtive's best guess for structural type of each input column
 
@@ -184,10 +184,10 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
 
-        simon_df = self._produce_annotations(inputs)
+        out_df = self._produce_annotations(inputs)
 
         # add metadata to output data frame
-        #simon_df = d3m_DataFrame(out_df)
+        simon_df = d3m_DataFrame(out_df)
         # first column ('semantic types')
         col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
         col_dict['structural_type'] = type("this is text")
