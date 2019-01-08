@@ -184,7 +184,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Each entry of the second one is a list of floats corresponding to prediction probabilities.
         """
 
-        out_df = self._produce_annotations(inputs)
+        out_df = self._produce_annotations(inputs = inputs)
 
         # add metadata to output data frame
         simon_df = d3m_DataFrame(out_df)
@@ -218,7 +218,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             Input pandas frame with metadata augmented and optionally overwritten
         """
         # calculate SIMON annotations
-        simon_annotations = self._produce_annotations(inputs)
+        simon_annotations = self._produce_annotations(inputs = inputs)
         overwrite = self.hyperparams['overwrite']
 
         # overwrite or augment metadata with SIMON annotations
