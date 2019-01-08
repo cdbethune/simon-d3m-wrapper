@@ -166,6 +166,8 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         out_df = pandas.DataFrame.from_records(list(result)).T
         out_df.columns = ['semantic types','probabilities']
+        print(out_df)
+        print(type(out_df))
         return out_df
 
     def produce_metafeatures(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
@@ -185,6 +187,8 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         """
 
         out_df = self._produce_annotations(inputs = inputs)
+        print(out_df)
+        print(type(out_df))
 
         # add metadata to output data frame
         simon_df = d3m_DataFrame(out_df)
