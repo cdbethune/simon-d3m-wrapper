@@ -103,7 +103,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
 
-        checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
+        checkpoint_dir = self.volumes["simon_models_1"]+"/pretrained_models/"
 
         with open(self.volumes["simon_models_1"]+"/Categories.txt",'r') as f:
             Categories = f.read().splitlines()
