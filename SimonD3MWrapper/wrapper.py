@@ -59,9 +59,9 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         },
             {
             "type": "TGZ",
-            "key": "simon_models",
-            "file_uri": "http://public.datadrivendiscovery.org/simon_models.tar.gz",
-            "file_digest":"c0e112493d796f472f5fe35087eac695d2845ace08b1fe825a0a0328caaf9dfc"
+            "key": "simon_models_1",
+            "file_uri": "http://public.datadrivendiscovery.org/simon_models_1.tar.gz",
+            "file_digest":"a6460f98e72dcbb1cae216f620bd3b4ca1da13e40b964866b1561da570545fb9"
         },
         ],
         # The same path the primitive is registered with entry points in setup.py.
@@ -150,14 +150,14 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                 category_count += 1
                 tmp2 = list(result[0][i])
                 tmp2.append('categorical')
-                result[0][i] = tuple(tmp2)
+                result[0][i] = tmp2
                 result[1][i].append(1)
                 if ('int' in result[1][i]) or ('float' in result[1][i]) \
                     or ('datetime' in result[1][i]):
                         ordinal_count += 1
                         tmp2 = list(result[0][i])
                         tmp2.append('ordinal')
-                        result[0][i] = tuple(tmp2)
+                        result[0][i] = tmp2
                         result[1][i].append(1)
         print("Done with statistical variable guessing")
         ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     # SIMON client
     # try with no hyperparameter
     volumes = {} # d3m large primitive architecture dictionary of large files
-    volumes['simon_models'] = '/home/simon_models'
+    volumes['simon_models_1'] = '/home/simon_models_1'
     simon_client = simon(hyperparams={'overwrite':False}, volumes = volumes)
 
     # produce method
