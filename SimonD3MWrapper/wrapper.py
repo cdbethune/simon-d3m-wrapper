@@ -33,6 +33,9 @@ class Hyperparams(hyperparams.Hyperparams):
     statistical_classification = hyperparams.UniformBool(default = False, semantic_types = [
         'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         description='whether to append categorical / ordinal annotations using rule-based classification')
+    multi_label_classification = hyperparams.UniformBool(default = False, semantic_types = [
+        'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        description='whether to perfrom multi-label classification and append multiple annotations to metadata')
     pass
 
 class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
@@ -212,7 +215,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         
         return CallResult(simon_df)
 
-    def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> None: #CallResult[Outputs]:
+    def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Inputs]:
         """
         Add SIMON annotations if manual annotations do not exist. Hyperparameter overwrite controls whether manual 
         annotations should be overwritten with SIMON annotations.
@@ -226,6 +229,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         Outputs
             Input pandas frame with metadata augmented and optionally overwritten
         """
+
         # calculate SIMON annotations
         simon_annotations = self._produce_annotations(inputs = inputs)
         if 'overwrite' in self.hyperparams.keys():
@@ -242,37 +246,55 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             # structural types
             if overwrite or structural_type is "" or structural_type is None or 'structural_type' not in metadata.keys():
                 col_dict['structural_type'] = type("string")
-
+            
             # semantic types
-            # overwrite with SIMON annotation of highest probability
-            # TODO: add functionality to sample from probabilities??
-            index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
-            annotation = simon_annotations['semantic types'][i][index]
             semantic_types = metadata['semantic_types']
-
-            ## ADD OTHER CLASSES, MULTI-LABEL CLASSIFICATION
+            ann = simon_annotations['semantic types'][i]
             if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
-                annotations = ()           
-                if annotation == 'categorical':
-                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData')
-                elif annotation == 'email' or annotation == 'text' or annotation == 'uri':
-                    annotations = annotations + ('https://schema.org/Text')
-                elif annotation == 'address' or annotation == 'state' or annotation == 'city' or annotation == 'postal_code' \
-                    or annotation == 'latitude' or annotation == 'longitude' or annotation == 'country' or annotation == 'country_code':
-                    annotation = annotations + ('https://metadata.datadrivendiscovery.org/types/Location')
-                elif annotation == 'boolean':
-                    annotations = annotations + ('https://schema.org/Boolean')
-                elif annotation == 'datetime':
-                    annotations = annotations + ('https://schema.org/DateTime')
-                elif annotation == 'float':
-                    annotations = annotations + ('https://schema.org/Float')
-                elif annotation == 'int':
-                    annotations = annotations + ('https://schema.org/Integer')
-                elif annotation == 'phone':
-                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber')
-                elif annotation == 'ordinal':
-                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData')
-                annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/Attribute')
+                annotations = () 
+                if 'multi_label_classification' not in self.hyperparams.keys() or self.hyperparams['multi_label_classification']:         
+                    index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
+                    annotation = ann[index]
+                    if 'categorical' in ann:
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
+                    if ('email' or 'text' or 'uri') in ann:
+                        annotations = annotations + ('https://schema.org/Text',)
+                    if ('address' or 'state' or 'city' or 'postal_code' or 'latitude' \
+                            or 'longitude' or 'country' or 'country_code') in ann:
+                        annotation = annotations + ('https://metadata.datadrivendiscovery.org/types/Location',)
+                    if 'boolean' in ann:
+                        annotations = annotations + ('https://schema.org/Boolean',)
+                    if 'datetime' in ann:
+                        annotations = annotations + ('https://schema.org/DateTime',)
+                    if 'float' in ann:
+                        annotations = annotations + ('https://schema.org/Float',)
+                    if 'int' in ann:
+                        annotations = annotations + ('https://schema.org/Integer',)
+                    if 'phone' in ann:
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',)
+                    if 'ordinal' in ann:
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)
+                else:
+                    if annotation == 'categorical':
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
+                    elif annotation == 'email' or annotation == 'text' or annotation == 'uri':
+                        annotations = annotations + ('https://schema.org/Text',)
+                    elif annotation == 'address' or annotation == 'state' or annotation == 'city' or annotation == 'postal_code' \
+                        or annotation == 'latitude' or annotation == 'longitude' or annotation == 'country' or annotation == 'country_code':
+                        annotation = annotations + ('https://metadata.datadrivendiscovery.org/types/Location',)
+                    elif annotation == 'boolean':
+                        annotations = annotations + ('https://schema.org/Boolean',)
+                    elif annotation == 'datetime':
+                        annotations = annotations + ('https://schema.org/DateTime',)
+                    elif annotation == 'float':
+                        annotations = annotations + ('https://schema.org/Float',)
+                    elif annotation == 'int':
+                        annotations = annotations + ('https://schema.org/Integer',)
+                    elif annotation == 'phone':
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',)
+                    elif annotation == 'ordinal':
+                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)
+                annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/Attribute',)
                 col_dict['semantic_types'] = annotations
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
         return CallResult(inputs)
@@ -287,7 +309,8 @@ if __name__ == '__main__':
     # try with no hyperparameter
     volumes = {} # d3m large primitive architecture dictionary of large files
     volumes['simon_models_1'] = '/data/home/jgleason/Downloads/simon_models_1'
-    simon_client = simon(hyperparams={'overwrite':False, 'statistical_classification':False}, volumes = volumes)
+    simon_client = simon(hyperparams={'overwrite':True, 'statistical_classification':False, \
+        'multi_label_classification':True}, volumes = volumes)
 
     # produce method
     result = simon_client.produce(inputs = df.value)
