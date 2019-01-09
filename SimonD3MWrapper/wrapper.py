@@ -30,6 +30,9 @@ class Hyperparams(hyperparams.Hyperparams):
     overwrite = hyperparams.UniformBool(default = False, semantic_types = [
         'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         description='whether to overwrite manual annotations with SIMON annotations')
+    statistical_classification = hyperparams.UniformBool(default = False, semantic_types = [
+        'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
+        description='whether to append categorical / ordinal annotations using rule-based classification')
     pass
 
 class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
@@ -105,22 +108,25 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         checkpoint_dir = self.volumes["simon_models_1"]+"/pretrained_models/"
 
-        with open(self.volumes["simon_models_1"]+"/Categories.txt",'r') as f:
+        if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
+            execution_config = "Base.pkl"
+            category_list = "/Categories.txt"
+        else:
+            execution_config = "Base_stat_geo.pkl"
+            category_list = "/Categories_base_stat_geo.txt"
+        with open(self.volumes["simon_models_1"]+ category_list,'r') as f:
             Categories = f.read().splitlines()
-
+        
         # orient the user a bit
         print("fixed categories are: ")
         Categories = sorted(Categories)
         print(Categories)
         category_count = len(Categories)
 
-        execution_config="Base.pkl"
-
         # load specified execution configuration
         if execution_config is None:
             raise TypeError
         Classifier = Simon(encoder={}) # dummy text classifier
-
         config = Classifier.load_config(execution_config, checkpoint_dir)
         encoder = config['encoder']
         checkpoint = config['checkpoint']
@@ -133,43 +139,42 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         model_compile = lambda m: m.compile(loss='binary_crossentropy',
                 optimizer='adam', metrics=['binary_accuracy'])
         model_compile(model)
-        y = model.predict(X)
+        y = model.predict(X)   
         # discard empty column edge case
         y[np.all(frame.isnull(),axis=0)]=0
 
         result = encoder.reverse_label_encode(y,p_threshold)
 
+        
         ## LABEL COMBINED DATA AS CATEGORICAL/ORDINAL
-        print("Beginning Guessing categorical/ordinal classifications...")
         category_count = 0
         ordinal_count = 0
         raw_data = frame.as_matrix()
         for i in np.arange(raw_data.shape[1]):
-            tmp = guess(raw_data[:,i], for_types ='category')
+            if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
+                print("Beginning Guessing categorical/ordinal classifications...")
+                tmp = guess(raw_data[:,i], for_types ='category')
+                if tmp[0]=='category':
+                    category_count += 1
+                    tmp2 = list(result[0][i])
+                    tmp2.append('categorical')
+                    result[0][i] = tmp2
+                    result[1][i].append(1)
+                    if ('int' in result[1][i]) or ('float' in result[1][i]) \
+                        or ('datetime' in result[1][i]):
+                            ordinal_count += 1
+                            tmp2 = list(result[0][i])
+                            tmp2.append('ordinal')
+                            result[0][i] = tmp2
+                            result[1][i].append(1)
+                print("Done with statistical variable guessing")
+                ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
             result[0][i] = d3m_List(result[0][i])
-            if tmp[0]=='category':
-                category_count += 1
-                tmp2 = result[0][i]
-                tmp2.append('categorical')
-                result[0][i] = tmp2
-                result[1][i].append(1)
-                if ('int' in result[1][i]) or ('float' in result[1][i]) \
-                    or ('datetime' in result[1][i]):
-                        ordinal_count += 1
-                        tmp2 = result[0][i]
-                        tmp2.append('ordinal')
-                        result[0][i] = tmp2
-                        result[1][i].append(1)
-        print("Done with statistical variable guessing")
-        ## FINISHED LABELING COMBINED DATA AS CATEGORICAL/ORDINAL
-
+            result[1][i] = d3m_List(result[1][i])
         Classifier.clear_session()
 
         out_df = pandas.DataFrame.from_records(list(result)).T
         out_df.columns = ['semantic types','probabilities']
-        print(CallResult(out_df))
-        print(CallResult(out_df).value)
-        d3m_DataFrame(CallResult(out_df).value)
         return out_df
 
     def produce_metafeatures(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> CallResult[Outputs]:
@@ -189,24 +194,22 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         """
 
         out_df = self._produce_annotations(inputs = inputs)
-        print(out_df)
-        print(type(out_df))
 
         # add metadata to output data frame
         simon_df = d3m_DataFrame(out_df)
         # first column ('semantic types')
-        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 0)))
+        col_dict = dict(simon_df.metadata.query((metadata_base.ALL_ELEMENTS, 0)))
         col_dict['structural_type'] = type("this is text")
         col_dict['name'] = 'semantic types'
         col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
-        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 0), col_dict)
+        simon_df.metadata = simon_df.metadata.update((metadata_base.ALL_ELEMENTS, 0), col_dict)
         # second column ('probabilities')
-        col_dict = dict(simon_df.metadata.query((metadata_base.All_ELEMENTS, 1)))
+        col_dict = dict(simon_df.metadata.query((metadata_base.ALL_ELEMENTS, 1)))
         col_dict['structural_type'] = type("this is text")
         col_dict['name'] = 'probabilities'
         col_dict['semantic_types'] = ('http://schema.org/Text', 'https://metadata.datadrivendiscovery.org/types/Attribute')
-        simon_df.metadata = simon_df.metadata.update((metadata_base.All_ELEMENTS, 1), col_dict)
-
+        simon_df.metadata = simon_df.metadata.update((metadata_base.ALL_ELEMENTS, 1), col_dict)
+        
         return CallResult(simon_df)
 
     def produce(self, *, inputs: Inputs, timeout: float = None, iterations: int = None) -> None: #CallResult[Outputs]:
@@ -225,7 +228,10 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         """
         # calculate SIMON annotations
         simon_annotations = self._produce_annotations(inputs = inputs)
-        overwrite = self.hyperparams['overwrite']
+        if 'overwrite' in self.hyperparams.keys():
+            overwrite = self.hyperparams['overwrite']
+        else:
+            overwrite = False
 
         # overwrite or augment metadata with SIMON annotations
         for i in range(0, inputs.shape[1]):
@@ -243,44 +249,48 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
             annotation = simon_annotations['semantic types'][i][index]
             semantic_types = metadata['semantic_types']
-            if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():           
+
+            ## ADD OTHER CLASSES, MULTI-LABEL CLASSIFICATION
+            if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
+                annotations = ()           
                 if annotation == 'categorical':
-                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/CategoricalData'
-                elif annotation == 'address' or annotation == 'email' or annotation == 'text' or annotation == 'uri':
-                    col_dict['semantic_types'][0] = 'https://schema.org/Text'
+                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData')
+                elif annotation == 'email' or annotation == 'text' or annotation == 'uri':
+                    annotations = annotations + ('https://schema.org/Text')
+                elif annotation == 'address' or annotation == 'state' or annotation == 'city' or annotation == 'postal_code' \
+                    or annotation == 'latitude' or annotation == 'longitude' or annotation == 'country' or annotation == 'country_code':
+                    annotation = annotations + ('https://metadata.datadrivendiscovery.org/types/Location')
                 elif annotation == 'boolean':
-                    col_dict['semantic_types'][0] = 'https://schema.org/Boolean'
+                    annotations = annotations + ('https://schema.org/Boolean')
                 elif annotation == 'datetime':
-                    col_dict['semantic_types'][0] = 'https://schema.org/DateTime'
+                    annotations = annotations + ('https://schema.org/DateTime')
                 elif annotation == 'float':
-                    col_dict['semantic_types'][0] = 'https://schema.org/Float'
+                    annotations = annotations + ('https://schema.org/Float')
                 elif annotation == 'int':
-                    col_dict['semantic_types'][0] = 'https://schema.org/Integer'
+                    annotations = annotations + ('https://schema.org/Integer')
                 elif annotation == 'phone':
-                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber'
+                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber')
                 elif annotation == 'ordinal':
-                    col_dict['semantic_types'][0] = 'https://metadata.datadrivendiscovery.org/types/OrdinalData'
-            if semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
-                col_dict['semantic_types'][1] = 'https://metadata.datadrivendiscovery.org/types/Attribute'
+                    annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData')
+                annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/Attribute')
+                col_dict['semantic_types'] = annotations
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
-        print(inputs.metadata.query_column(0))
         return CallResult(inputs)
 
 if __name__ == '__main__':  
     # LOAD DATA AND PREPROCESSING
-    input_dataset = container.Dataset.load("file:///home/196_autoMpg/TRAIN/dataset_TRAIN/datasetDoc.json")
+    input_dataset = container.Dataset.load("file:///data/home/jgleason/D3m/datasets/seed_datasets_current/196_autoMpg/TRAIN/dataset_TRAIN/datasetDoc.json")
     ds2df_client = DatasetToDataFrame(hyperparams={"dataframe_resource":"0"})
     df = ds2df_client.produce(inputs = input_dataset)
 
     # SIMON client
     # try with no hyperparameter
     volumes = {} # d3m large primitive architecture dictionary of large files
-    volumes['simon_models_1'] = '/home/simon_models_1'
-    simon_client = simon(hyperparams={'overwrite':False}, volumes = volumes)
+    volumes['simon_models_1'] = '/data/home/jgleason/Downloads/simon_models_1'
+    simon_client = simon(hyperparams={'overwrite':False, 'statistical_classification':False}, volumes = volumes)
 
     # produce method
     result = simon_client.produce(inputs = df.value)
-    print(result.value)
 
     # produce_metafeatures method
     features = simon_client.produce_metafeatures(inputs = df.value)
