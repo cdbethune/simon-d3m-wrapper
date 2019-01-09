@@ -33,7 +33,7 @@ class Hyperparams(hyperparams.Hyperparams):
     statistical_classification = hyperparams.UniformBool(default = False, semantic_types = [
         'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         description='whether to append categorical / ordinal annotations using rule-based classification')
-    multi_label_classification = hyperparams.UniformBool(default = False, semantic_types = [
+    multi_label_classification = hyperparams.UniformBool(default = True, semantic_types = [
         'https://metadata.datadrivendiscovery.org/types/ControlParameter'],
         description='whether to perfrom multi-label classification and append multiple annotations to metadata')
     pass
