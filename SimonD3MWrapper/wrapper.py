@@ -250,84 +250,37 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             # semantic types
             semantic_types = metadata['semantic_types']
             ann = simon_annotations['semantic types'][i]
+            annotations_dict = {'categorical': ('https://metadata.datadrivendiscovery.org/types/CategoricalData',), 
+                                'email': ('https://schema.org/email',),
+                                'text': ('https://schema.org/Text',),
+                                'uri': ('https://schema.org/URL',),
+                                'address': ('https://schema.org/address',),
+                                'state': ('https://schema.org/State',),
+                                'city': ('https://schema.org/City',),
+                                'postal_code': ('https://schema.org/postalCode',),
+                                'latitude': ('https://schema.org/latitude',),
+                                'longitude': ('https://schema.org/longitude',),
+                                'country': ('https://schema.org/Country',),
+                                'country_code': ('https://schema.org/addressCountry',),
+                                'boolean': ('https://schema.org/Boolean',),
+                                'datetime': ('https://schema.org/DateTime',),
+                                'float': ('https://schema.org/Float',),
+                                'int': ('https://schema.org/Integer',),
+                                'phone': ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',),
+                                'ordinal': ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)}                    
             if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
                 annotations = () 
                 if 'multi_label_classification' not in self.hyperparams.keys() or self.hyperparams['multi_label_classification']:         
-                    if 'categorical' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
-                    if 'email' in ann:
-                        annotations = annotations + ('https://schema.org/email',)
-                    if 'text' in ann:
-                        annotations = annotations + ('https://schema.org/Text',)
-                    if 'uri' in ann:
-                        annotations = annotations + ('https://schema.org/URL',)
-                    if 'address' in ann:
-                        annotations = annotations + ('https://schema.org/address',)
-                    if 'state' in ann:
-                        annotations = annotations + ('https://schema.org/State',)
-                    if 'city' in ann:
-                        annotations = annotations + ('https://schema.org/City',)
-                    if 'postal_code' in ann:
-                        annotations = annotations + ('https://schema.org/postalCode',)
-                    if 'latitude' in ann:
-                        annotations = annotations + ('https://schema.org/latitude',)
-                    if 'longitude' in ann:
-                        annotations = annotations + ('https://schema.org/longitude',)
-                    if 'country' in ann:
-                        annotations = annotations + ('https://schema.org/Country',)
-                    if 'country_code' in ann:
-                        annotations = annotations + ('https://schema.org/addressCountry',)
-                    if 'boolean' in ann:
-                        annotations = annotations + ('https://schema.org/Boolean',)
-                    if 'datetime' in ann:
-                        annotations = annotations + ('https://schema.org/DateTime',)
-                    if 'float' in ann:
-                        annotations = annotations + ('https://schema.org/Float',)
-                    if 'int' in ann:
-                        annotations = annotations + ('https://schema.org/Integer',)
-                    if 'phone' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',)
-                    if 'ordinal' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)
+                    for key, value in annotations_dict:
+                        if key in ann:
+                            annotations = annotations + value
                 else:
                     index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
                     ann = ann[index]
-                    if 'categorical' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
-                    elif 'email' in ann:
-                        annotations = annotations + ('https://schema.org/email',)
-                    elif 'text' in ann:
-                        annotations = annotations + ('https://schema.org/Text',)
-                    elif 'uri' in ann:
-                        annotations = annotations + ('https://schema.org/URL',)
-                    elif 'address' in ann:
-                        annotations = annotations + ('https://schema.org/address',)
-                    elif 'state' in ann:
-                        annotations = annotations + ('https://schema.org/State',)
-                    elif 'city' in ann:
-                        annotations = annotations + ('https://schema.org/City',)
-                    elif 'postal_code' in ann:
-                        annotations = annotations + ('https://schema.org/postalCode',)
-                    elif 'latitude' in ann:
-                        annotations = annotations + ('https://schema.org/latitude',)
-                    elif 'longitude' in ann:
-                        annotations = annotations + ('https://schema.org/longitude',)
-                    elif 'country' in ann:
-                        annotations = annotations + ('https://schema.org/Country',)
-                    elif 'country_code' in ann:
-                        annotations = annotations + ('https://schema.org/addressCountry',)
-                    elif 'boolean' in ann:
-                        annotations = annotations + ('https://schema.org/Boolean',)
-                    elif 'datetime' in ann:
-                        annotations = annotations + ('https://schema.org/DateTime',)
-                    elif 'float' in ann:
-                        annotations = annotations + ('https://schema.org/Float',)
-                    elif 'int' in ann:
-                        annotations = annotations + ('https://schema.org/Integer',)
-                    elif 'phone' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',)
-                    elif 'ordinal' in ann:
-                        annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)
+                    for key, value in annotations_dict:
+                        if key in ann:
+                            annotations = annotations + value
+                            break
                 annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/Attribute',)
                 col_dict['semantic_types'] = annotations
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
@@ -348,6 +301,7 @@ if __name__ == '__main__':
 
     # produce method
     result = simon_client.produce(inputs = df.value)
+    print(result.metadata.query_column(0))
 
     # produce_metafeatures method
     features = simon_client.produce_metafeatures(inputs = df.value)
