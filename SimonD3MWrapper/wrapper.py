@@ -271,15 +271,15 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
                 annotations = () 
                 if 'multi_label_classification' not in self.hyperparams.keys() or self.hyperparams['multi_label_classification']:         
-                    for key, value in annotations_dict:
+                    for key in annotations_dict:
                         if key in ann:
-                            annotations = annotations + value
+                            annotations = annotations + annotations_dict[key]
                 else:
                     index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
                     ann = ann[index]
-                    for key, value in annotations_dict:
+                    for key in annotations_dict:
                         if key in ann:
-                            annotations = annotations + value
+                            annotations = annotations + annotations_dict[key]
                             break
                 annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/Attribute',)
                 col_dict['semantic_types'] = annotations
