@@ -253,8 +253,6 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
                 annotations = () 
                 if 'multi_label_classification' not in self.hyperparams.keys() or self.hyperparams['multi_label_classification']:         
-                    index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
-                    annotation = ann[index]
                     if 'categorical' in ann:
                         annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
                     if 'email' in ann:
@@ -292,6 +290,8 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                     if 'ordinal' in ann:
                         annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)
                 else:
+                    index = simon_annotations['probabilities'][i].index(max(simon_annotations['probabilities'][i]))
+                    ann = ann[index]
                     if 'categorical' in ann:
                         annotations = annotations + ('https://metadata.datadrivendiscovery.org/types/CategoricalData',)
                     elif 'email' in ann:
