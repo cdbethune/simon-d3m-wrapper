@@ -301,7 +301,7 @@ if __name__ == '__main__':
 
     # produce method
     result = simon_client.produce(inputs = df.value)
-    print(result.metadata.query_column(0))
+    print(result.value.metadata.query_column(0))
 
     # produce_metafeatures method
     features = simon_client.produce_metafeatures(inputs = df.value)
