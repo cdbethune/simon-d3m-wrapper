@@ -65,7 +65,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         },
             {
             "type": "TGZ",
-            "key": "simon_models",
+            "key": "simon_models_1",
             "file_uri": "http://public.datadrivendiscovery.org/simon_models_1.tar.gz",
             "file_digest":"a6460f98e72dcbb1cae216f620bd3b4ca1da13e40b964866b1561da570545fb9"
         },
