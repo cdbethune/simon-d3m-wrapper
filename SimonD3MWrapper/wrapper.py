@@ -108,7 +108,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         p_threshold = 0.5
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
-    
+        print(self.volumes)
         checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
         print(checkpoint_dir)
         
