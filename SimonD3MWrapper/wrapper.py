@@ -108,7 +108,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         p_threshold = 0.5
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
-        checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
+        checkpoint_dir = self.volumes["simon_models_1"]+"/pretrained_models/"
         
         if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
             execution_config = "Base.pkl"
@@ -116,7 +116,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         else:
             execution_config = "Base_stat_geo.pkl"
             category_list = "/Categories_base_stat_geo.txt"
-        with open(self.volumes["simon_models"]+ category_list,'r') as f:
+        with open(self.volumes["simon_models_1"]+ category_list,'r') as f:
             Categories = f.read().splitlines()
         
         # orient the user a bit
@@ -137,13 +137,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         # build classifier model
         model = Classifier.generate_model(maxlen, max_cells, category_count)
-        print('--------------------------')
-        print(model)
-        print(checkpoint)
-        
-        print('--------------------------')
         Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
-        print('--------------------------')
 
         model_compile = lambda m: m.compile(loss='binary_crossentropy',
                 optimizer='adam', metrics=['binary_accuracy'])
@@ -301,7 +295,7 @@ if __name__ == '__main__':
     # SIMON client
     # try with no hyperparameter
     volumes = {} # d3m large primitive architecture dictionary of large files
-    volumes['simon_models'] = '/data/home/jgleason/Downloads/simon_models'
+    volumes['simon_models_1'] = '/data/home/jgleason/Downloads/simon_models_1'
     simon_client = simon(hyperparams={'overwrite':True, 'statistical_classification':False, \
         'multi_label_classification':True}, volumes = volumes)
 
