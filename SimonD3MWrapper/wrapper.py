@@ -143,6 +143,8 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         
         print('--------------------------')
         Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
+        print('--------------------------')
+
         model_compile = lambda m: m.compile(loss='binary_crossentropy',
                 optimizer='adam', metrics=['binary_accuracy'])
         model_compile(model)
