@@ -229,7 +229,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         Outputs
             Input pandas frame with metadata augmented and optionally overwritten
         """
-
+        
         # calculate SIMON annotations
         simon_annotations = self._produce_annotations(inputs = inputs)
         if 'overwrite' in self.hyperparams.keys():
