@@ -108,9 +108,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         p_threshold = 0.5
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
-        print(self.volumes)
         checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
-        print(checkpoint_dir)
         
         if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
             execution_config = "Base.pkl"
@@ -134,7 +132,10 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         config = Classifier.load_config(execution_config, checkpoint_dir)
         encoder = config['encoder']
         checkpoint = config['checkpoint']
-
+        print('--------------------------')
+        print(encoder)
+        print(checkpoint)
+        print('--------------------------')
         X = encoder.encodeDataFrame(frame)
 
         # build classifier model
