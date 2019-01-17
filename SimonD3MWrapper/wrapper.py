@@ -132,14 +132,16 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         config = Classifier.load_config(execution_config, checkpoint_dir)
         encoder = config['encoder']
         checkpoint = config['checkpoint']
-        print('--------------------------')
-        print(encoder)
-        print(checkpoint)
-        print('--------------------------')
+
         X = encoder.encodeDataFrame(frame)
 
         # build classifier model
         model = Classifier.generate_model(maxlen, max_cells, category_count)
+        print('--------------------------')
+        print(model)
+        print(checkpoint)
+        
+        print('--------------------------')
         Classifier.load_weights(checkpoint, None, model, checkpoint_dir)
         model_compile = lambda m: m.compile(loss='binary_crossentropy',
                 optimizer='adam', metrics=['binary_accuracy'])
