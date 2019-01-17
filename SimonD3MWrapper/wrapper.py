@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # SIMON client
     # try with no hyperparameter
     volumes = {} # d3m large primitive architecture dictionary of large files
-    volumes['simon_models_1'] = '/data/home/jgleason/Downloads/simon_models_1'
+    volumes['simon_models'] = '/data/home/jgleason/Downloads/simon_models'
     simon_client = simon(hyperparams={'overwrite':True, 'statistical_classification':False, \
         'multi_label_classification':True}, volumes = volumes)
 
