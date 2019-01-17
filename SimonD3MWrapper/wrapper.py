@@ -108,9 +108,10 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         p_threshold = 0.5
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
-
+    
         checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
-
+        print(checkpoint_dir)
+        
         if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
             execution_config = "Base.pkl"
             category_list = "/Categories.txt"
