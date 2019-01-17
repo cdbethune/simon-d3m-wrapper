@@ -67,7 +67,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             "type": "TGZ",
             "key": "simon_models",
             "file_uri": "http://public.datadrivendiscovery.org/simon_models_1.tar.gz",
-            "file_digest":"a6460f98e72dcbb1cae216f620bd3b4ca1da13e40b964866b1561da570545fb9"
+            "file_digest":"d071106b823ab1168879651811dd03b829ab0728ba7622785bb5d3541496c45f"
         },
         ],
         # The same path the primitive is registered with entry points in setup.py.
