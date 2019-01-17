@@ -109,7 +109,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
 
-        checkpoint_dir = self.volumes["simon_models"]+"/pretrained_models/"
+        checkpoint_dir = self.volumes["simon_models_1"]+"/pretrained_models/"
 
         if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
             execution_config = "Base.pkl"
@@ -117,7 +117,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         else:
             execution_config = "Base_stat_geo.pkl"
             category_list = "/Categories_base_stat_geo.txt"
-        with open(self.volumes["simon_models"]+ category_list,'r') as f:
+        with open(self.volumes["simon_models_1"]+ category_list,'r') as f:
             Categories = f.read().splitlines()
         
         # orient the user a bit
