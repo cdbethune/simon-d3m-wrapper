@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# unencoded_chars
+SimonD3MWrapper/unencoded_char.json
