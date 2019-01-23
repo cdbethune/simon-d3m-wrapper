@@ -1,5 +1,7 @@
 # Simon D3M Wrapper
-Wrapper of the Simon semantic classifier (the base library can be found here: https://github.com/NewKnowledge/simon) into D3M infrastructure. All code is written in Python 3.5 and must be run in 3.5 or greater. 
+Wrapper of the Simon semantic classifier into D3M infrastructure. All code is written in Python 3.5 and must be run in 3.5 or greater. 
+
+The base library for SIMON can be found here: https://github.com/NewKnowledge/simon
 
 ## Output
 The output should be a list of two list of lists. 
