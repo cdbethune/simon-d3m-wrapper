@@ -253,7 +253,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
             annotations_dict = {'categorical': ('https://metadata.datadrivendiscovery.org/types/CategoricalData',), 
                                 'email': ('https://schema.org/email',),
                                 'text': ('https://schema.org/Text',),
-                                'uri': ('https://schema.org/URL',),
+                                'uri': ('https://metadata.datadrivendiscovery.org/types/FileName',),
                                 'address': ('https://schema.org/address',),
                                 'state': ('https://schema.org/State',),
                                 'city': ('https://schema.org/City',),
