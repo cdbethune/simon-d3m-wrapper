@@ -269,7 +269,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                                 'phone': ('https://metadata.datadrivendiscovery.org/types/AmericanPhoneNumber',),
                                 'ordinal': ('https://metadata.datadrivendiscovery.org/types/OrdinalData',)}                    
             if overwrite or semantic_types is "" or semantic_types is None or 'semantic_types' not in metadata.keys():
-                annotations = semantic_types
+                annotations = ()
                 if 'multi_label_classification' not in self.hyperparams.keys() or self.hyperparams['multi_label_classification']:         
                     for key in annotations_dict:
                         if key in ann:
@@ -281,6 +281,15 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
                         if key in ann:
                             annotations = annotations + annotations_dict[key]
                             break
+                            
+                # add attribute / index / target metadata to annotations tuple
+                if 'https://metadata.datadrivendiscovery.org/types/PrimaryKey' in semantic_types:
+                    annotations = annotations + 'https://metadata.datadrivendiscovery.org/types/PrimaryKey'
+                elif 'https://metadata.datadrivendiscovery.org/types/SuggestedTarget' in semantic_types:
+                    annotations = annotations + 'https://metadata.datadrivendiscovery.org/types/SuggestedTarget'
+                else:
+                    annotations = annotations + 'https://metadata.datadrivendiscovery.org/types/Attribute'
+
                 col_dict['semantic_types'] = annotations
             inputs.metadata = inputs.metadata.update_column(i, col_dict)
         return CallResult(inputs)
