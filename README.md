@@ -3,6 +3,10 @@ Wrapper of the Simon semantic classifier into D3M infrastructure. All code is wr
 
 The base library for SIMON can be found here: https://github.com/NewKnowledge/simon
 
+## Install
+
+pip3 install -e git+https://github.com/NewKnowledge/simon-d3m-wrapper.git#egg=SimonD3MWrapper --process-dependency-links
+
 ## Output
 The output should be a list of two list of lists. 
 
