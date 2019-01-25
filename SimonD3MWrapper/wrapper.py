@@ -39,6 +39,9 @@ class Hyperparams(hyperparams.Hyperparams):
     pass
 
 class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
+    """
+        Private method that produces primtive's best guess for structural type of each input column
+    """
     metadata = metadata_base.PrimitiveMetadata({
         # Simply an UUID generated once and fixed forever. Generated using "uuid.uuid4()".
         'id': "d2fa8df2-6517-3c26-bafc-87b701c4043a",
@@ -87,8 +90,6 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
 
     def _produce_annotations(self, *, inputs: Inputs) -> Outputs:
         """
-        Private method that produces primtive's best guess for structural type of each input column
-
         Parameters
         ----------
         inputs: Input pandas frame
