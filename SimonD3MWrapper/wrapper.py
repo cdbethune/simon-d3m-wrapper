@@ -16,7 +16,7 @@ from d3m.primitive_interfaces.base import CallResult
 from d3m import container, utils
 from d3m.container import DataFrame as d3m_DataFrame, List as d3m_List
 from d3m.metadata import hyperparams, base as metadata_base
-from d3m.primitives.datasets import DatasetToDataFrame
+import common_primitives.dataset_to_dataframe
 
 from common_primitives import utils as utils_cp
 
@@ -68,7 +68,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         },
             {
             "type": "TGZ",
-            "key": "simon_models",
+            "key": "simon_models_1",
             "file_uri": "http://public.datadrivendiscovery.org/simon_models_1.tar.gz",
             "file_digest":"d071106b823ab1168879651811dd03b829ab0728ba7622785bb5d3541496c45f"
         },
@@ -109,7 +109,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         p_threshold = 0.5
 
         DEBUG = True # boolean to specify whether or not print DEBUG information
-        checkpoint_dir = self.volumes["simon_models_1"]+"/pretrained_models/"
+        checkpoint_dir = self.volumes["simon_models_1"] + "/simon_models_1/pretrained_models/"
         
         if 'statistical_classification' in self.hyperparams.keys() and self.hyperparams['statistical_classification']:
             execution_config = "Base.pkl"
@@ -117,7 +117,7 @@ class simon(TransformerPrimitiveBase[Inputs, Outputs, Hyperparams]):
         else:
             execution_config = "Base_stat_geo.pkl"
             category_list = "/Categories_base_stat_geo.txt"
-        with open(self.volumes["simon_models_1"]+ category_list,'r') as f:
+        with open(self.volumes["simon_models_1"] + "/simon_models_1" + category_list,'r') as f:
             Categories = f.read().splitlines()
         
         # orient the user a bit
